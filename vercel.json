@@ -1,7 +1,15 @@
 {
-  "functions": {
-    "index.js": {
-      "runtime": "nodejs18.x"
+  "version": 2,
+  "builds": [
+    {
+      "src": "api/verify.js",
+      "use": "@vercel/node"
     }
-  }
+  ],
+  "routes": [
+    {
+      "src": "/api/verify",
+      "dest": "api/verify.js"
+    }
+  ]
 }
