@@ -7,17 +7,17 @@ module.exports = (req, res) => {
 
   const secret = process.env.ELEVENLABS_HMAC_SECRET || 'wsec_a0360dcb0876cdd64e9feae0cf10fe4390d2c06e3ba85336d5e0bb298dcb3d89';
   const header = req.headers['x-elevenlabs-signature'];
-  const parts = header.split(',');
-  const v0Part = parts.find(p => p.startsWith('v0='));
-  const signature = v0Part.split('=')[1];
-
 
   if (!header) {
-    return res.status(400).json({ error: 'Missing signature' });
+    return res.status(400).json({ error: 'Missing signature header' });
   }
 
   const v0Part = header.split(',').find(p => p.startsWith('v0='));
-  const signature = v0Part?.split('=')[1];
+  if (!v0Part) {
+    return res.status(400).json({ error: 'Invalid signature format' });
+  }
+
+  const receivedSignature = v0Part.split('=')[1];
 
   const chunks = [];
   req.on('data', chunk => chunks.push(chunk));
@@ -29,7 +29,9 @@ module.exports = (req, res) => {
       .update(rawBody)
       .digest('hex');
 
-    if (signature !== expected) {
+    if (receivedSignature !== expected) {
+      console.log('Expected:', expected);
+      console.log('Received:', receivedSignature);
       return res.status(401).json({ ok: false, error: 'HMAC failed' });
     }
 
