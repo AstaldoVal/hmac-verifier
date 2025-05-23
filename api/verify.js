@@ -7,6 +7,10 @@ module.exports = (req, res) => {
 
   const secret = process.env.ELEVENLABS_HMAC_SECRET || 'wsec_a0360dcb0876cdd64e9feae0cf10fe4390d2c06e3ba85336d5e0bb298dcb3d89';
   const header = req.headers['x-elevenlabs-signature'];
+  const parts = header.split(',');
+  const v0Part = parts.find(p => p.startsWith('v0='));
+  const signature = v0Part.split('=')[1];
+
 
   if (!header) {
     return res.status(400).json({ error: 'Missing signature' });
